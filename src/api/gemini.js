@@ -38,42 +38,26 @@ export async function parseInsurance(rawText) {
   `)
 }
 
-export async function searchTreatment(symptom, insuranceData) {
+export async function searchTreatment(query, insuranceData) {
   return askGemini(`
-    You are a medical insurance cost assistant.
-    Patient symptom: "${symptom}"
-    Insurance plan: ${JSON.stringify(insuranceData)}
+    You are a medical insurance cost expert.
+    Search Query: "${query}"
+    Patient Insurance: ${JSON.stringify(insuranceData)}
     
     Return ONLY valid JSON with no markdown, no backticks, no explanation:
     {
-      "condition": "likely condition name",
-      "urgency": "low/medium/high",
-      "treatments": ["list of recommended treatments"],
-      "tests": [
-        {
-          "name": "test name",
-          "estimatedCost": 200,
-          "insuranceCovers": 160,
-          "patientPays": 40,
-          "coveragePercent": 80
-        }
+      "procedureName": "official name of the medical procedure or treatment",
+      "description": "1-2 sentence description of what this involves",
+      "estimatedCost": "$X,XXX",
+      "yourEstimatedCost": "$X,XXX",
+      "breakdown": [
+        { "label": "Facility Fee", "value": "$XXX" },
+        { "label": "Provider Fee", "value": "$XXX" },
+        { "label": "Insurance Covered", "value": "-$XXX" },
+        { "label": "Your Responsibility", "value": "$XXX" }
       ],
-      "hospitals": [
-        {
-          "name": "Hospital Name",
-          "distance": "2.3 miles",
-          "specialty": "relevant specialty",
-          "estimatedVisitCost": 300,
-          "insuranceCovers": 240,
-          "patientPays": 60,
-          "rating": 4.2,
-          "inNetwork": true
-        }
-      ],
-      "totalEstimatedCost": 500,
-      "totalInsuranceCovers": 400,
-      "totalPatientOwes": 100,
-      "disclaimer": "short disclaimer"
+      "advice": "Pro-tip for saving money on this specific procedure (e.g. go to outpatient vs hospital)",
+      "summary": "1 sentence plain english summary for audio readout"
     }
   `)
 }

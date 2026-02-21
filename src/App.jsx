@@ -10,7 +10,7 @@ export default function App() {
   return (
     <InsuranceProvider>
       <BrowserRouter>
-        <div className="min-h-screen bg-slate-950 text-white">
+        <div className="min-h-screen bg-gray-50 text-slate-900">
           <Navbar />
           <Routes>
             <Route path="/" element={<InsuranceInfo />} />

@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap');
+
+:root {
+    --font-sans: 'DM Sans', sans-serif;
+    --font-syne: 'Syne', sans-serif;
+}
+
+body {
+    font-family: var(--font-sans);
+    @apply bg-gray-50 text-slate-900 antialiased;
+}
+
+.syne {
+    font-family: var(--font-syne);
+}
