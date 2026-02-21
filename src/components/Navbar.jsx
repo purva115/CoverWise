@@ -1,14 +1,14 @@
 import { Link, useLocation } from 'react-router-dom'
 
-const links = [
-    { to: '/', label: '🏥 Insurance Info' },
-    { to: '/search', label: '🔍 Search Guide' },
-    { to: '/events', label: '📅 Community' },
-    { to: '/donate', label: '💜 Donate' },
-]
-
 export default function Navbar() {
     const { pathname } = useLocation()
+    const links = [
+        { to: '/', label: '🏥 Insurance Info' },
+        { to: '/search', label: '🔍 Search Guide' },
+        { to: '/events', label: '📅 Community' },
+        { to: '/donate', label: '💜 Donate' },
+    ]
+
     return (
         <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-md px-8 py-4 flex justify-between items-center">
             <div className="flex items-center gap-10">
