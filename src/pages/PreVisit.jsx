@@ -361,21 +361,40 @@ export default function PreVisit() {
                     0% { background-position: -200% 0; }
                     100% { background-position: 200% 0; }
                 }
+                .glass {
+                    background: rgba(255, 255, 255, 0.7);
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                }
+                .blob {
+                    position: fixed;
+                    width: 500px;
+                    height: 500px;
+                    background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0) 70%);
+                    border-radius: 50%;
+                    z-index: -1;
+                    filter: blur(40px);
+                }
             `}</style>
+
+            <div className="blob top-[-10%] left-[-10%] animate-pulse"></div>
+            <div className="blob bottom-[-10%] right-[-10%] delay-1000 animate-pulse" style={{ background: 'radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0) 70%)' }}></div>
 
             <div className="max-w-4xl mx-auto px-6 py-12">
 
                 {/* Header */}
-                <div className="mb-12 text-center">
-                    <div className="inline-flex items-center gap-2 bg-slate-900 text-white rounded-full px-4 py-1.5 mb-6 text-[10px] font-bold tracking-[0.2em] uppercase">
-                        <Activity className="w-3 h-3 text-blue-400" />
+                <div className="mb-12 text-center relative">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-100/30 rounded-full blur-3xl -z-10"></div>
+                    <div className="inline-flex items-center gap-2 bg-gradient-to-r from-slate-900 to-blue-900 text-white rounded-full px-5 py-2 mb-6 text-[10px] font-bold tracking-[0.2em] uppercase shadow-lg shadow-blue-200/50">
+                        <Activity className="w-3 h-3 text-blue-300 animate-pulse" />
                         Hospital Pre-Visit Assistant
                     </div>
-                    <h1 className="syne text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
+                    <h1 className="syne text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1] drop-shadow-sm">
                         Prepare for Your <br />
-                        <span className="text-blue-600">Hospital Visit</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Hospital Visit</span>
                     </h1>
-                    <p className="text-slate-500 mt-6 text-lg max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-slate-500 mt-8 text-xl max-w-2xl mx-auto leading-relaxed font-medium">
                         Upload your insurance, talk to our AI assistant, and get a clear breakdown of costs,
                         coverage, and nearby facilities before you step into the hospital.
                     </p>
@@ -393,10 +412,10 @@ export default function PreVisit() {
                             onDragLeave={() => setDragOver(false)}
                             onDrop={handleDrop}
                             onClick={() => fileInputRef.current?.click()}
-                            className={`relative rounded-[2rem] border-2 border-dashed flex flex-col items-center justify-center p-8 transition-all duration-300 cursor-pointer
-                                ${dragOver ? 'border-blue-500 bg-blue-50 scale-[1.02]' :
-                                    uploadedFile ? 'border-emerald-200 bg-emerald-50/30' :
-                                        'border-slate-200 bg-white hover:border-blue-400Shadow-lg shadow-slate-200/50'}
+                            className={`relative rounded-[2.5rem] border-2 border-dashed flex flex-col items-center justify-center p-10 transition-all duration-500 cursor-pointer glass
+                                ${dragOver ? 'border-blue-500 bg-blue-50/50 scale-[1.02] shadow-2xl shadow-blue-200/50' :
+                                    uploadedFile ? 'border-emerald-300 bg-emerald-50/50' :
+                                        'border-slate-200 shadow-xl shadow-slate-200/40 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-100/50'}
                             `}
                         >
                             <input
@@ -410,20 +429,26 @@ export default function PreVisit() {
                             {uploadedFile ? (
                                 <div className="text-center">
                                     {preview ? (
-                                        <img src={preview} className="h-28 mx-auto rounded-xl object-contain mb-4 shadow-sm" alt="Preview" />
+                                        <div className="relative group">
+                                            <img src={preview} className="h-32 mx-auto rounded-2xl object-contain mb-4 shadow-xl transition-transform group-hover:scale-110" alt="Preview" />
+                                            <div className="absolute inset-0 bg-emerald-500/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        </div>
                                     ) : (
-                                        <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl mb-4">📄</div>
+                                        <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-[2rem] flex items-center justify-center text-4xl mb-4 shadow-inner">📄</div>
                                     )}
-                                    <p className="text-slate-900 font-bold text-xs truncate max-w-[150px]">{uploadedFile.name}</p>
-                                    <p className="text-emerald-600 text-[10px] font-bold mt-1">Ready for analysis</p>
+                                    <p className="text-slate-900 font-extrabold text-sm truncate max-w-[180px]">{uploadedFile.name}</p>
+                                    <div className="mt-2 flex items-center justify-center gap-1.5">
+                                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                                        <p className="text-emerald-600 text-[10px] font-black uppercase tracking-widest">Ready for analysis</p>
+                                    </div>
                                 </div>
                             ) : (
                                 <>
-                                    <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
-                                        <Plus className="w-8 h-8 text-slate-300" />
+                                    <div className="w-20 h-20 bg-slate-50/50 rounded-[2rem] flex items-center justify-center mb-5 shadow-inner group-hover:bg-blue-50 transition-colors">
+                                        <Plus className="w-10 h-10 text-slate-300 group-hover:text-blue-400 transition-colors" />
                                     </div>
-                                    <p className="text-slate-900 font-bold text-sm">Upload Insurance</p>
-                                    <p className="text-slate-400 text-[10px] mt-1">Drop card image or PDF</p>
+                                    <p className="text-slate-900 font-extrabold text-base">Upload Insurance</p>
+                                    <p className="text-slate-400 text-[10px] uppercase font-bold tracking-widest mt-2">JPG, PNG, WEBP or PDF</p>
                                 </>
                             )}
                         </div>
@@ -578,7 +603,7 @@ export default function PreVisit() {
                                             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-125 transition-transform duration-700"></div>
                                             <div className="relative z-10">
                                                 <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-4">Total Treatment Estimate</p>
-                                                <h3 className="syne text-4xl font-extrabold">{result.estTotalCost}</h3>
+                                                <h3 className="syne text-3xl font-extrabold">{result.estTotalCost}</h3>
                                                 <p className="text-blue-100/50 text-[10px] mt-4 font-medium flex items-center gap-2">
                                                     <Info className="w-3 h-3" />
                                                     Includes anesthesia, facility & professional fees

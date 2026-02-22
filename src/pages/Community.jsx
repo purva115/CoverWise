@@ -76,7 +76,7 @@ const DONATION_TIERS = [
     { amount: '$45', sol: '0.18', label: 'Recovery Hero', icon: '🩹', desc: 'Supports prescription and follow-up costs', popular: true },
     { amount: '$150', sol: '0.60', label: 'Surgical Support', icon: '🏥', desc: 'Contributes to major emergency procedures' }
 ]
-const DONATION_HISTORY_KEY = 'coverwise_solana_donations'
+const DONATION_HISTORY_KEY = 'careless_solana_donations'
 
 function txExplorerUrl(signature) {
     const cluster = getSolanaCluster()
@@ -231,14 +231,14 @@ function EventCard({ event, onDelete, isOwner }) {
 export default function Community() {
     // Event State
     const [events, setEvents] = useState(() => {
-        const saved = localStorage.getItem('coverwise_events')
+        const saved = localStorage.getItem('careless_events')
         return saved ? [...SEED_EVENTS, ...JSON.parse(saved)] : SEED_EVENTS
     })
     const [activeCategory, setActiveCategory] = useState('all')
     const [searchQuery, setSearchQuery] = useState('')
     const [showForm, setShowForm] = useState(false)
     const [userEventIds, setUserEventIds] = useState(() => {
-        const saved = localStorage.getItem('coverwise_my_events')
+        const saved = localStorage.getItem('careless_my_events')
         return saved ? JSON.parse(saved) : []
     })
     const [form, setForm] = useState({
@@ -334,12 +334,12 @@ export default function Community() {
             postedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         }
 
-        const savedEvents = JSON.parse(localStorage.getItem('coverwise_events') || '[]')
+        const savedEvents = JSON.parse(localStorage.getItem('careless_events') || '[]')
         const updatedSaved = [newEvent, ...savedEvents]
-        localStorage.setItem('coverwise_events', JSON.stringify(updatedSaved))
+        localStorage.setItem('careless_events', JSON.stringify(updatedSaved))
 
         const updatedIds = [newEvent.id, ...userEventIds]
-        localStorage.setItem('coverwise_my_events', JSON.stringify(updatedIds))
+        localStorage.setItem('careless_my_events', JSON.stringify(updatedIds))
         setUserEventIds(updatedIds)
 
         setEvents(prev => [newEvent, ...prev])
@@ -356,10 +356,10 @@ export default function Community() {
         const updated = events.filter(e => e.id !== id)
         setEvents(updated)
         const savedEvents = updated.filter(e => !SEED_EVENTS.find(s => s.id === e.id))
-        localStorage.setItem('coverwise_events', JSON.stringify(savedEvents))
+        localStorage.setItem('careless_events', JSON.stringify(savedEvents))
         const updatedIds = userEventIds.filter(uid => uid !== id)
         setUserEventIds(updatedIds)
-        localStorage.setItem('coverwise_my_events', JSON.stringify(updatedIds))
+        localStorage.setItem('careless_my_events', JSON.stringify(updatedIds))
     }
 
     const filtered = events.filter(e => {
