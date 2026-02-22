@@ -1,181 +1,234 @@
-# CareLess 💙
-**Less confusion. Less stress. More care.**
+💙 CareLess
+Less Confusion. Less Stress. More Care.
 
-CareLess helps students navigate healthcare costs and billing across the full journey:
-1) **Before a visit:** estimate costs + understand coverage (with voice AI explanations)  
-2) **After a visit:** upload an EOB/bill and get a plain-English breakdown + next steps  
-3) **Community support:** donate to a Student Emergency Fund (Solana + Phantom) and discover free medical camps nearby
+CareLess is a financial clarity platform designed to help students navigate healthcare costs with confidence.
 
----
+It supports users before care, after care, and when costs feel overwhelming — combining AI-driven insurance analysis, medical bill simplification, voice assistance, and a community emergency fund powered by Solana.
 
-## ✨ What We Built
+🚀 Problem
 
-### 1) Pre-Visit Budget Forecast (Pre Visit)
-**Goal:** Reduce uncertainty before you step into a clinic.
+Healthcare billing in the U.S. is confusing, stressful, and financially risky.
 
-**Flow**
-- Upload insurance card (optional in demo)
-- Select a condition (dropdown)
-- Enter basic plan numbers (deductible / coinsurance / copay)
-- Click **Verify & Analyze**
-- Get:
-  - Total estimate range
-  - “You pay” range
-  - Clear “why” explanations (deductible vs coinsurance vs copay)
-  - AI Assistant **speaks** the summary (ElevenLabs TTS)
+Students struggle with:
 
----
+Estimating treatment costs before visiting a provider
 
-### 2) Post-Visit EOB/Bill Explainer + Denial Intelligence (Post Visit)
-**Goal:** Make confusing medical billing readable and actionable.
+Understanding complex Explanation of Benefits (EOB) documents
 
-**Flow**
-- Upload EOB or bill PDF
-- We extract service lines and show a simplified breakdown:
-  - CPT code → plain English
-  - Charge / discount / allowed / paid / patient responsibility
-  - Tooltips for billing jargon
-- Next actions:
-  - Appeal checklist
-  - Call script / questions to ask billing office
+Navigating denial codes and appeal processes
 
----
+Affording unexpected medical expenses
 
-### 3) Community Page (Community)
-**Goal:** A student-first safety net + prevention layer.
+CareLess reduces financial anxiety across all three stages of care.
 
-**Features**
-- **Student Emergency Fund donations** (Solana Playground + Phantom wallet)
-- **On-chain donation feed** for transparent proof-of-impact
-- **Free medical camps near you** (curated/listed in UI)
+🧠 Solution Overview
 
----
+CareLess operates across three phases:
 
-## 🧰 Tech Stack
-- **Frontend:** React + Vite
-- **UI:** Custom components (cards, meters, breakdown panels, tooltips)
-- **AI / Voice:** ElevenLabs Text-to-Speech
-- **Document Intelligence:** EOB/Bill PDF extraction + structured parsing
-- **Blockchain:** Solana Playground + Phantom Wallet
-- **(Optional) Storage:** MongoDB Atlas (if you persist parsed EOBs / donation metadata)
+🔵 1. Predict (Pre-Visit Budget Forecast)
 
----
+User selects condition
 
-## 🏗️ High-Level Architecture
-- Client (React) handles UI, file upload, wallet connect
-- Backend (API) handles:
-  - PDF ingestion + parsing into structured line items
-  - cost estimation logic
-  - appeal checklist/call script generation (template or AI)
-- ElevenLabs TTS generates an audio narration for pre-visit summary
-- Solana integration records donation transactions and renders a feed
+Inputs deductible, coinsurance, copay
 
----
+Receives:
 
-## 🚀 Getting Started
+Estimated total cost range
 
-### Prereqs
-- Node.js 18+ (recommended)
-- Phantom Wallet browser extension (for donations demo)
+Estimated “you pay” amount
 
-### Install & Run
-```bash
-# 1) install
+Clear explanation of deductible & coinsurance impact
+
+AI voice assistant narrates the breakdown (ElevenLabs TTS)
+
+🟢 2. Decode (Post-Visit EOB Intelligence)
+
+Upload EOB / hospital bill (PDF)
+
+Extract service line items:
+
+CPT code → Plain English
+
+Charge
+
+Network discount
+
+Allowed amount
+
+Insurance paid
+
+Patient responsibility
+
+Jargon tooltips (deductible, PPO discount, allowed amount, etc.)
+
+“Next Actions”:
+
+Appeal checklist
+
+Call script for billing office
+
+🟣 3. Support (Community & Emergency Fund)
+
+Student Health Emergency Fund
+
+Solana + Phantom wallet integration
+
+On-chain donation feed for transparency
+
+Free medical camps discovery (community events)
+
+🏗 Tech Stack
+
+Frontend
+
+React + Vite
+
+Modern UI components
+
+Responsive layout
+
+Backend
+
+PDF parsing for EOB extraction
+
+Rule-based insurance calculator
+
+Structured data transformation
+
+AI
+
+Gemini API (for structured extraction / assistance)
+
+ElevenLabs (text-to-speech voice narration)
+
+Blockchain
+
+Solana Playground
+
+Phantom Wallet integration
+
+On-chain donation tracking
+
+📂 Project Structure (High-Level)
+CareLess/
+│
+├── src/
+│   ├── pages/
+│   │   ├── PreVisit.jsx
+│   │   ├── PostVisit.jsx
+│   │   ├── Community.jsx
+│   │
+│   ├── components/
+│   ├── services/
+│   ├── utils/
+│
+├── public/
+├── .env
+├── README.md
+⚙️ Environment Variables
+
+Create a .env file in the root directory:
+
+VITE_GEMINI_API_KEY=
+VITE_ELEVENLABS_API_KEY=
+VITE_ELEVENLABS_VOICE_ID=
+VITE_DONATION_WALLET=
+VITE_SOLANA_CLUSTER=
+🔑 Variable Descriptions
+
+VITE_GEMINI_API_KEY → API key for Gemini AI services
+
+VITE_ELEVENLABS_API_KEY → API key for ElevenLabs TTS
+
+VITE_ELEVENLABS_VOICE_ID → Selected voice ID for narration
+
+VITE_DONATION_WALLET → Solana wallet address for emergency fund
+
+VITE_SOLANA_CLUSTER → Solana cluster (e.g., devnet, mainnet-beta)
+
+⚠️ Never commit your .env file. Add it to .gitignore.
+
+🛠 Installation & Setup
+# Clone repository
+git clone https://github.com/your-username/careless.git
+
+cd careless
+
+# Install dependencies
 npm install
 
-# 2) run dev
+# Run development server
 npm run dev
 
-App should be available at:
+App will run at:
 
 http://localhost:5173
+🎬 Demo Flow
+1️⃣ Pre-Visit
 
-🔐 Environment Variables
+Select condition
 
-Create a .env file in the project root (do not commit this):
+Enter insurance details
 
-# ElevenLabs
-VITE_ELEVENLABS_API_KEY=your_key_here
-VITE_ELEVENLABS_VOICE_ID=your_voice_id_here
+Click "Verify & Analyze"
 
-# Backend API (if applicable)
-VITE_API_BASE_URL=http://localhost:8000
+AI assistant narrates cost breakdown
 
-# Solana (if applicable)
-VITE_SOLANA_NETWORK=devnet
+2️⃣ Post-Visit
 
-✅ Add .env to .gitignore.
+Upload EOB PDF
 
-🧪 Demo Script (3–4 minutes)
+View simplified CPT breakdown
 
-Pre Visit
+Explore appeal checklist
 
-Pick a condition + enter deductible/coinsurance/copay
+3️⃣ Community
 
-Click Verify & Analyze
+Donate to Student Emergency Fund
 
-Show estimate + “why”
+View on-chain donation feed
 
-Play the voice summary (ElevenLabs)
+Discover nearby free health camps
 
-Post Visit
+🎯 Impact
 
-Upload an EOB/bill PDF
+CareLess aims to:
 
-Show extracted CPT lines + plain-English explanations
+Reduce financial anxiety before medical visits
 
-Show “You pay” + tooltips
+Improve billing transparency
 
-Show appeal checklist + call script
+Increase successful appeals
 
-Community
+Support students through community funding
 
-Connect Phantom wallet
+Make healthcare literacy accessible
 
-Make a small devnet donation
+🧪 Sample EOB Used in Demo
 
-Show on-chain feed update
+Example EOB parsing demonstrated using:
 
-Scroll to free medical camps/events
+EOB_Sep032025.pdf
 
-📁 Suggested Repo Structure
-careless/
-  src/
-    pages/
-      PreVisit/
-      PostVisit/
-      Community/
-    components/
-    assets/
-    utils/
-  public/
-  backend/                # if you have an API server
-  README.md
-  .env.example
-🧠 Notes on Data & Accuracy
+Extracted:
 
-CareLess provides assistive estimates and explanations, not medical or legal advice.
+CPT 99204 → Office Visit
 
-Costs depend on plan details, provider contracts, and claim adjudication.
+CPT 28470 → Fracture Treatment
 
-Always confirm billing/coverage with your provider/insurer.
+Deductible impact
 
-🛣️ Roadmap (After Hackathon)
+PPO discounts
 
-In-network vs out-of-network handling
+Patient responsibility
 
-Better CPT/remark-code knowledge base
+👥 Team
 
-Persist user history (Atlas)
+Built at [Hackathon Name]
+Team: [Add names]
 
-Automated appeal letter generation + attachments pack
+🏆 Vision
 
-Verified event sources for free camps (public health feeds)
+Healthcare shouldn't require a finance degree to understand.
 
-🙌 Team
-
-Built at a hackathon with ❤️ for students navigating healthcare complexity.
-
-If you use this project, please star the repo and share feedback!
-
-::contentReference[oaicite:0]{index=0}
+CareLess transforms complex insurance systems into clear, human-readable insights — empowering students to make informed decisions and reducing stress at every stage of care.
