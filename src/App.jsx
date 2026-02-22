@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { InsuranceProvider } from './context/InsuranceContext'
 import Navbar from './components/Navbar'
 import PreVisit from './pages/PreVisit'
+import PostVisit from './pages/PostVisit'
 import Community from './pages/Community'
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
           <Navbar />
           <Routes>
             <Route path="/" element={<PreVisit />} />
+            <Route path="/post-visit" element={<PostVisit />} />
             <Route path="/community" element={<Community />} />
           </Routes>
         </div>

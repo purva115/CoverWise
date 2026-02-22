@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useInsurance } from '../context/InsuranceContext'
 import { speak } from '../api/elevenlabs'
+import { listGenerateContentModels } from '../api/geminiModels'
 import {
     Plus, X, Mic, MicOff, Search, FileText, Activity,
     MapPin, DollarSign, ShieldAlert, Volume2, Sparkles,
@@ -9,7 +10,56 @@ import {
 } from 'lucide-react'
 
 const GEMINI_KEY = import.meta.env.VITE_GEMINI_API_KEY
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`
+const DEFAULT_PREVISIT_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash']
+
+function cleanModelJson(raw) {
+    const trimmed = (raw || '').replace(/```json|```/g, '').trim()
+    const start = trimmed.indexOf('{')
+    const end = trimmed.lastIndexOf('}')
+    if (start >= 0 && end > start) return trimmed.slice(start, end + 1)
+    return trimmed
+}
+
+function normalizeAnalysisPayload(payload = {}) {
+    const mitigationSteps = Array.isArray(payload.mitigationSteps)
+        ? payload.mitigationSteps.map((step, index) => ({
+            step: step?.step || step?.title || `Step ${index + 1}`,
+            tip: step?.tip || step?.desc || 'Review this action with your insurer.'
+        }))
+        : []
+
+    const nearbyDoctors = Array.isArray(payload.nearbyDoctors)
+        ? payload.nearbyDoctors.map((doctor, index) => ({
+            name: doctor?.name || `Specialist ${index + 1}`,
+            specialty: doctor?.specialty || 'Specialty not specified',
+            dist: doctor?.dist || 'Distance unavailable',
+            rating: doctor?.rating ?? 'N/A'
+        }))
+        : []
+
+    const procedureSteps = Array.isArray(payload.procedureSteps)
+        ? payload.procedureSteps.map((step, index) => ({
+            title: step?.title || `Phase ${index + 1}`,
+            desc: step?.desc || 'Details were not provided by the model.'
+        }))
+        : []
+
+    return {
+        ...payload,
+        type: payload?.type || 'analysis',
+        treatment: payload?.treatment || 'Treatment analysis',
+        coverageStatus: payload?.coverageStatus || 'Coverage details unavailable',
+        hospital: payload?.hospital || 'Hospital recommendation unavailable',
+        estTotalCost: payload?.estTotalCost || 'N/A',
+        yourCost: payload?.yourCost || 'N/A',
+        insurancePays: payload?.insurancePays || 'N/A',
+        denialRiskValue: Number.isFinite(Number(payload?.denialRiskValue)) ? Number(payload.denialRiskValue) : 0,
+        mitigationSteps,
+        nearbyDoctors,
+        procedureSteps,
+        summary: payload?.summary || 'Analysis completed. Please verify details with your provider and insurer.'
+    }
+}
 
 export default function PreVisit() {
     const [input, setInput] = useState('')
@@ -127,6 +177,12 @@ export default function PreVisit() {
         setResult(null)
 
         try {
+            if (!GEMINI_KEY) {
+                const keyError = new Error('Missing VITE_GEMINI_API_KEY in environment.')
+                keyError.status = 401
+                throw keyError
+            }
+
             const parts = []
 
             if (uploadedFile) {
@@ -173,24 +229,82 @@ export default function PreVisit() {
             }`
             })
 
-            const res = await fetch(GEMINI_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts }] })
-            })
+            const preferredModel = import.meta.env.VITE_GEMINI_MODEL_PREVISIT || import.meta.env.VITE_GEMINI_MODEL
+            const discoveredModels = await listGenerateContentModels(GEMINI_KEY)
+            const modelSequence = [...new Set([preferredModel, ...DEFAULT_PREVISIT_MODELS, ...discoveredModels].filter(Boolean))]
+            let parsed = null
+            let lastError = null
+            let sawRateLimit = false
 
-            const data = await res.json()
-            const raw = data.candidates[0].content.parts[0].text
-            const cleaned = raw.replace(/```json|```/g, '').trim()
-            const parsed = JSON.parse(cleaned)
+            for (const model of modelSequence) {
+                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_KEY}`
+
+                try {
+                    const res = await fetch(geminiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts }] })
+                    })
+
+                    if (!res.ok) {
+                        let details = ''
+                        try {
+                            const err = await res.json()
+                            details = err?.error?.message || JSON.stringify(err)
+                        } catch {
+                            details = await res.text()
+                        }
+
+                        const apiError = new Error(`Gemini API error (${res.status})${details ? `: ${details}` : ''}`)
+                        apiError.status = res.status
+                        apiError.model = model
+                        throw apiError
+                    }
+
+                    const data = await res.json()
+                    const raw = data?.candidates?.[0]?.content?.parts?.map((part) => part?.text || '').join('').trim()
+                    if (!raw) {
+                        const emptyError = new Error(`No model output found from ${model}.`)
+                        emptyError.status = 502
+                        emptyError.model = model
+                        throw emptyError
+                    }
+
+                    parsed = JSON.parse(cleanModelJson(raw))
+                    break
+                } catch (modelError) {
+                    lastError = modelError
+                    if (modelError?.status === 429) sawRateLimit = true
+                    if (
+                        modelError?.status === 403
+                        || modelError?.status === 404
+                        || modelError?.status === 429
+                        || modelError?.status === 502
+                        || modelError instanceof SyntaxError
+                    ) {
+                        continue
+                    }
+                    throw modelError
+                }
+            }
+
+            if (!parsed && sawRateLimit) {
+                const rateLimitError = new Error('Gemini rate limit reached for available models.')
+                rateLimitError.status = 429
+                throw rateLimitError
+            }
+
+            if (!parsed) {
+                throw lastError || new Error('Pre-visit analysis failed for all configured Gemini models.')
+            }
 
             if (parsed.type === 'denial') {
                 setError(parsed.denialMessage || "I'm sorry, I can only assist with hospital pre-visit and insurance related queries.")
-                setLoading(false)
                 return
             }
 
-            setResult(parsed)
+            const normalized = normalizeAnalysisPayload(parsed)
+            setResult(normalized)
 
             // If insurance data was extracted, save it to context (optional mapping)
             if (parsed.treatment) {
@@ -200,16 +314,27 @@ export default function PreVisit() {
 
             // ElevenLabs Voice Output
             try {
-                await speak(parsed.summary)
+                await speak(normalized.summary)
             } catch (vErr) {
                 console.warn('Voice failed:', vErr)
             }
 
         } catch (err) {
             console.error(err)
-            setError('Analysis failed. Please try again.')
+            if (err?.status === 401) {
+                setError('Missing Gemini API key. Add VITE_GEMINI_API_KEY to .env and restart Vite.')
+            } else if (err?.status === 429) {
+                setError('Gemini rate limit reached (429). Wait a minute and try again.')
+            } else if (err?.status === 403) {
+                setError('Gemini access denied (403). Check API key restrictions and enabled model access.')
+            } else if (err?.status === 404) {
+                setError('No available Gemini model supports generateContent for this API version. Set VITE_GEMINI_MODEL and restart Vite.')
+            } else {
+                setError('Analysis failed. Please try again.')
+            }
+        } finally {
+            setLoading(false)
         }
-        setLoading(false)
     }
 
     const suggestedPrompts = [

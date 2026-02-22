@@ -4,6 +4,7 @@ export default function Navbar() {
     const { pathname } = useLocation()
     const links = [
         { to: '/', label: '🏥 Pre Visit' },
+        { to: '/post-visit', label: '🧾 Post Visit' },
         { to: '/community', label: '📅 Community' },
     ]
 
